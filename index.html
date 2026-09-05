@@ -49,6 +49,13 @@
     .ar-button {
       background-image: none;
     }
+
+    .ar-status {
+      min-height: 1.2em;
+      margin: 10px 2px 0;
+      font-size: .85rem;
+      color: #5a6270;
+    }
   </style>
 </head>
 <body>
@@ -75,7 +82,7 @@
       ios-src="assets/shield.usdz"
       alt="3D-модель щита"
       ar
-      ar-modes="webxr scene-viewer quick-look"
+      ar-modes="scene-viewer webxr quick-look"
       ar-scale="fixed"
       ar-placement="floor"
       environment-image="assets/lightroom_14b.hdr"
@@ -90,6 +97,32 @@
         View in your space
       </button>
     </model-viewer>
+
+    <p class="ar-status" id="ar-status" aria-live="polite"></p>
+
+    <script type="module">
+      const mv = document.querySelector('model-viewer');
+      const line = document.getElementById('ar-status');
+      const arMessages = {
+        'session-started': 'AR-сессия запущена, наведите камеру на поверхность…',
+        'object-placed':   'Модель размещена',
+        'session-ended':   'AR-сессия завершена',
+        'failed':          'Не удалось запустить AR. Проверьте, что установлено приложение'
+                           + ' «Google Play Services for AR» (ARCore), Chrome обновлён,'
+                           + ' и браузеру разрешён доступ к камере.',
+      };
+      mv.addEventListener('ar-status', (e) => {
+        line.textContent = arMessages[e.detail.status] || e.detail.status;
+      });
+      mv.addEventListener('load', () => {
+        if (!line.textContent) line.textContent = 'Модель загружена — можно крутить и запускать AR.';
+      });
+      mv.addEventListener('error', (e) => {
+        const d = e.detail || {};
+        line.textContent = 'Ошибка (' + (d.type || 'unknown') + '): не удалось загрузить модель. '
+                           + 'Обновите страницу и проверьте интернет.';
+      });
+    </script>
 
     <div class="hint">
       <b>Важно:</b> доступ к камере и AR работают только по <b>HTTPS</b>
