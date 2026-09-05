@@ -3,6 +3,10 @@
 Демо-страница с размещением 3D-модели в дополненной реальности через
 [`<model-viewer>`](https://modelviewer.dev).
 
+**Опубликована на GitHub Pages:** <https://ponchikpro3.github.io/ar-shield/>
+(HTTPS из коробки — AR на телефоне работает сразу: откройте ссылку в
+Chrome на Android или Safari на iPhone).
+
 ## Структура проекта
 
 ```
