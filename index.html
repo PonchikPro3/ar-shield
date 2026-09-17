@@ -1,136 +1,46 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AR — 3D-модель через model-viewer</title>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Moon Cat — MindAR</title>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #0b1025; }
+      #status { position: fixed; z-index: 10; left: 50%; bottom: 24px; transform: translateX(-50%); max-width: 88vw; padding: 11px 16px; border-radius: 999px; color: #fff; background: rgba(11,16,37,.82); text-align: center; font-size: 14px; pointer-events: none; }
+    </style>
+  </head>
+  <body>
+    <div id="status">Наведите камеру на изображение Moon Cat</div>
+    <a-scene
+      mindar-image="imageTargetSrc: ./targets.mind; maxTrack: 1; uiLoading: yes; uiScanning: yes;"
+      color-space="sRGB"
+      renderer="colorManagement: true; physicallyCorrectLights: true"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: false">
+      <a-assets timeout="15000">
+        <a-asset-item id="cat-model" src="./babuleh_cat.glb"></a-asset-item>
+      </a-assets>
 
-  <!-- Библиотека model-viewer -->
-  <script type="module"
-          src="https://unpkg.com/@google/model-viewer@4.0.0/dist/model-viewer.min.js">
-  </script>
-
-  <style>
-    :root {
-      color-scheme: light dark;
-    }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      background: #f4f5f7;
-      color: #1f2430;
-    }
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 24px 16px 48px;
-    }
-    h1 { font-size: 1.5rem; }
-
-    model-viewer {
-      width: 100%;
-      height: 480px;
-      border-radius: 16px;
-      background-color: #dfe4ea;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, .12);
-      --poster-color: #dfe4ea;
-      --progress-bar-color: #4285f4;
-      --progress-mask: transparent;
-    }
-
-    .hint {
-      margin-top: 16px;
-      padding: 14px 16px;
-      background: #eef3ff;
-      border-left: 4px solid #4285f4;
-      border-radius: 8px;
-      font-size: .95rem;
-    }
-    .ar-button {
-      background-image: none;
-    }
-
-    .ar-status {
-      min-height: 1.2em;
-      margin: 10px 2px 0;
-      font-size: .85rem;
-      color: #5a6270;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>3D-модель в AR</h1>
-    <p>Нажмите «View in your space», чтобы разместить модель в реальном окружении
-       (iOS — Quick Look, Android — Scene Viewer).</p>
-
-    <!--
-      Атрибуты:
-      src            — модель glTF (.glb) для встроенного просмотрщика и Scene Viewer (Android);
-                       конвертирована из исходного shield.stl (Blender, decimate + Draco)
-      ios-src        — модель USDZ для Quick Look на iOS
-      ar             — включает AR-режим
-      ar-modes       — порядок запуска нативных AR-просмотрщиков:
-                       webxr (WebXR API), scene-viewer (Android), quick-look (iOS)
-      ar-scale       — фиксация масштаба модели в AR
-      environment-image — HDRI-карта (.hdr) для корректного освещения
-      camera-controls — вращение/зум модели мышью и жестами
-      shadow-intensity / exposure — тень и экспозиция для реалистичности
-    -->
-    <model-viewer
-      src="assets/shield.glb"
-      ios-src="assets/shield.usdz"
-      alt="3D-модель щита"
-      ar
-      ar-modes="scene-viewer webxr quick-look"
-      ar-scale="fixed"
-      ar-placement="floor"
-      environment-image="assets/lightroom_14b.hdr"
-      shadow-intensity="1"
-      exposure="1"
-      camera-controls
-      touch-action="pan-y"
-      auto-rotate
-      auto-rotate-delay="3000">
-      <!-- Кнопка запуска AR -->
-      <button slot="ar-button" class="ar-button">
-        View in your space
-      </button>
-    </model-viewer>
-
-    <p class="ar-status" id="ar-status" aria-live="polite"></p>
-
-    <script type="module">
-      const mv = document.querySelector('model-viewer');
-      const line = document.getElementById('ar-status');
-      const arMessages = {
-        'session-started': 'AR-сессия запущена, наведите камеру на поверхность…',
-        'object-placed':   'Модель размещена',
-        'session-ended':   'AR-сессия завершена',
-        'failed':          'Не удалось запустить AR. Проверьте, что установлено приложение'
-                           + ' «Google Play Services for AR» (ARCore), Chrome обновлён,'
-                           + ' и браузеру разрешён доступ к камере.',
-      };
-      mv.addEventListener('ar-status', (e) => {
-        line.textContent = arMessages[e.detail.status] || e.detail.status;
-      });
-      mv.addEventListener('load', () => {
-        if (!line.textContent) line.textContent = 'Модель загружена — можно крутить и запускать AR.';
-      });
-      mv.addEventListener('error', (e) => {
-        const d = e.detail || {};
-        line.textContent = 'Ошибка (' + (d.type || 'unknown') + '): не удалось загрузить модель. '
-                           + 'Обновите страницу и проверьте интернет.';
-      });
+      <a-entity mindar-image-target="targetIndex: 0" id="marker-target">
+        <a-light type="ambient" color="#ffffff" intensity="1.25"></a-light>
+        <a-light type="directional" color="#fff4dc" intensity="1.8" position="1 2 2"></a-light>
+        <a-gltf-model
+          src="#cat-model"
+          position="0 0.05 0"
+          rotation="0 0 0"
+          scale="0.45 0.45 0.45"
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
+        </a-gltf-model>
+      </a-entity>
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    </a-scene>
+    <script>
+      const status = document.getElementById('status');
+      const target = document.getElementById('marker-target');
+      target.addEventListener('targetFound', () => { status.textContent = 'Маркер найден — модель загружена'; });
+      target.addEventListener('targetLost', () => { status.textContent = 'Наведите камеру на изображение Moon Cat'; });
     </script>
-
-    <div class="hint">
-      <b>Важно:</b> доступ к камере и AR работают только по <b>HTTPS</b>
-      или на <b>localhost</b>. Открытие файла двойным кликом (file://) не подойдёт.<br>
-      Запуск локального сервера: двойной клик по <code>start-server.bat</code>
-      (или <code>powershell -File server.ps1</code>), затем откройте
-      <a href="http://localhost:8080/">http://localhost:8080/</a>.
-    </div>
-  </div>
-</body>
+  </body>
 </html>
