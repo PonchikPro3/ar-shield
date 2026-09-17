@@ -1,46 +1,19 @@
-<!doctype html>
-<html lang="ru">
+<html>
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Moon Cat — MindAR</title>
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <style>
-      body { margin: 0; font-family: Arial, sans-serif; background: #0b1025; }
-      #status { position: fixed; z-index: 10; left: 50%; bottom: 24px; transform: translateX(-50%); max-width: 88vw; padding: 11px 16px; border-radius: 999px; color: #fff; background: rgba(11,16,37,.82); text-align: center; font-size: 14px; pointer-events: none; }
-    </style>
   </head>
   <body>
-    <div id="status">Наведите камеру на изображение Moon Cat</div>
-    <a-scene
-      mindar-image="imageTargetSrc: ./targets.mind; maxTrack: 1; uiLoading: yes; uiScanning: yes;"
-      color-space="sRGB"
-      renderer="colorManagement: true; physicallyCorrectLights: true"
-      vr-mode-ui="enabled: false"
-      device-orientation-permission-ui="enabled: false">
-      <a-assets timeout="15000">
-        <a-asset-item id="cat-model" src="./babuleh_cat.glb"></a-asset-item>
+    <a-scene mindar-image="imageTargetSrc: assets/targets (1).mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+      <a-assets>
+        <a-asset-item id="avatarModel" src="assest/babuleh_cat.glb"></a-asset-item>
       </a-assets>
 
-      <a-entity mindar-image-target="targetIndex: 0" id="marker-target">
-        <a-light type="ambient" color="#ffffff" intensity="1.25"></a-light>
-        <a-light type="directional" color="#fff4dc" intensity="1.8" position="1 2 2"></a-light>
-        <a-gltf-model
-          src="#cat-model"
-          position="0 0.05 0"
-          rotation="0 0 0"
-          scale="0.45 0.45 0.45"
-          animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
-        </a-gltf-model>
-      </a-entity>
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+      <a-entity mindar-image-target="targetIndex: 0">
+        <a-gltf-model rotation="0 0 0 " position="0 0 0.1" scale="0.005 0.005 0.005" src="#avatarModel" animation="property: position; to: 0 0.1 0.1; dur: 1000; easing: easeInOutQuad; loop: true; dir: alternate">
+      </a-entity>
     </a-scene>
-    <script>
-      const status = document.getElementById('status');
-      const target = document.getElementById('marker-target');
-      target.addEventListener('targetFound', () => { status.textContent = 'Маркер найден — модель загружена'; });
-      target.addEventListener('targetLost', () => { status.textContent = 'Наведите камеру на изображение Moon Cat'; });
-    </script>
   </body>
 </html>
