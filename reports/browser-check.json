@@ -16,12 +16,17 @@
     "modelVisibleAndCentered": true,
     "screenshot": "portrait-layout.jpg"
   },
-  "physicalMobileTest": "User confirmed Sunny Kitty visible centered in AR on Android Chrome. See mobile-test.json for scope and limitations.",
+  "physicalMobileTest": "Previous viewer-space mode confirmed by user; current surface-placement mode needs a new physical-device test.",
   "published": {
     "url": "https://ponchikpro3.github.io/ar-shield/WebGL/",
     "modelVisible": true,
     "textureVisible": true,
     "consoleErrors": 0,
     "consoleWarnings": 0
+  },
+  "surfacePlacement": {
+    "unityLogicChecks": 11,
+    "xrSessionBridgeChecks": 4,
+    "physicalDeviceStatus": "Pending new surface-placement test"
   }
 }

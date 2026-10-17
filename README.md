@@ -2,7 +2,7 @@
 
 **Приложение GitHub Pages:** https://ponchikpro3.github.io/ar-shield/
 
-Прежняя страница MindAR заменена сценой Unity с WebXR Export от De-Panther. Используется **`assets/sunny_kitty.glb`**, скопированный из ассетов проекта без изменений. Модель видна сразу после загрузки, по центру, на расстоянии 1,2 м перед активной камерой. В AR она следует за направлением взгляда (viewer-space), без поиска поверхности и касаний для размещения.
+Прежняя страница MindAR заменена сценой Unity с WebXR Export от De-Panther. Используется **`assets/sunny_kitty.glb`**, скопированный из ассетов проекта без изменений. В обычном 3D-просмотре модель видна сразу по центру, на расстоянии 1,2 м перед камерой. В AR наведите камеру на пол или стол: появится бирюзовый круг. Коснитесь экрана, чтобы поставить котика в отмеченное место. Модель остаётся в окружении при движении телефона; новое касание переносит её в новую отмеченную точку.
 
 Интерфейс: кнопка «Открыть AR» на совместимом устройстве; прогресс во время загрузки; короткое сообщение о 3D-режиме, если immersive-ar недоступен; маленькая обязательная атрибуция модели. Вход в AR требует действия пользователя по правилам браузера.
 
@@ -12,11 +12,13 @@
 - `UnityProject/Assets/Scenes/ViewerSpace.unity` — единственная сцена сборки.
 - В сцене: `WebXRManager`, `WebXRCameraSet`, `WebXRCamera`, `TrackedPoseDriver`, основная камера, камеры AR/VR и два `WebXRController` без визуальных моделей контроллеров.
 - Раскладка камер повторяет BiRP-вариант WebXRCameraSet из De-Panther. WebXRLoader включён через XR Plug-in Management.
-- Для BiRP включён `DisableXRDisplaySubsystem`. Reference space AR — `viewer`; hit-test, hand tracking, HDR, тени и постэффекты отключены.
-- `Assets/Scripts/ViewerSpaceObject.cs` обновляет положение перед активной камерой; поддерживает смену режима и усреднение глаз для двух видов. Генератор сцены проверяет центр viewport на перемещённой и повёрнутой камере.
+- Для BiRP включён `DisableXRDisplaySubsystem`. Reference space AR — `local`; включён WebXR Hit Test. Hand tracking, HDR, тени и постэффекты отключены. Нативная AR-сессия запрашивает `local` и `hit-test` как обязательные возможности.
+- `Assets/Scripts/ViewerSpaceObject.cs` отвечает за начальный 3D-просмотр по центру. `SurfacePlacement.cs` использует WebXR Hit Test и фиксирует трансформацию в пространстве local при событии XRSession select. Стопы модели стоят на высоте найденной поверхности. Поддерживаются горизонтальные поверхности (пол, стол); вертикальные стены отбрасываются. Маркер скрывается при потере результата hit-test; уже поставленная модель сохраняется. При новом входе в AR размещение сбрасывается.
 - `Assets/Prefabs/SunnyKitty.prefab` — статическая модель с исходной текстурой. 2 114 вершин, 3 528 треугольников, упрощение не применялось. UV и нормали перенесены из GLB; материал Unlit и двусторонний, как в оригинале.
 - `Vendor/webxr` и `Vendor/webxr-interactions` — официальные пакеты De-Panther **0.25.0**, commit `1f7a06c57867f300dabfa2bbbee85a6b03fa0005`. Лицензия: `Vendor/LICENSE`.
 - `Assets/WebGLTemplates/WebXRTemplate/` — минимальная адаптация официального **WebXRFullView2020**, с сохранением инициализации Unity и событий WebXR. В текущем репозитории нет шаблона с буквальным именем WebXRTemplate; это локальное имя адаптации.
+
+Генератор выполняет 11 проверок размещения на синтетических XR-позах, включая неподвижность после движения камеры, перенос по повторному касанию и возврат в 3D. `tools/surface-session.test.cjs` проверяет запрос возможностей, экранные касания, очистку слушателей и ошибки сессии. Это проверки логики; физическая проверка размещения выполняется отдельно.
 
 Все пути `Assets/...` выше находятся внутри `UnityProject`.
 
@@ -24,7 +26,7 @@
 
 Сайт настроен на **Deploy from a branch → main → /(root)**. Корневой `index.html` перенаправляет в `WebGL/`, где находится готовая сборка. `.nojekyll` отключает обработку Jekyll. Зависимости Unity и исходные ассеты не запрашиваются приложением во время запуска.
 
-**Compression Format: Disabled; Decompression Fallback: OFF; Threads Support: OFF.** Поэтому обычные `.data`, `.js`, `.wasm` работают на GitHub Pages без специальных заголовков `Content-Encoding`, COOP/COEP и compression fallback. Все пути относительные и учитывают префикс `/ar-shield/`. GitHub Pages обеспечивает доверенный HTTPS: сертификат на телефоне устанавливать не нужно.
+**Compression Format: Disabled; Decompression Fallback: OFF; Threads Support: OFF.** Поэтому обычные `.data`, `.js`, `.wasm` работают на GitHub Pages без специальных заголовков `Content-Encoding`, COOP/COEP и compression fallback. Все пути относительные и учитывают префикс `/ar-shield/`. Файлы Build именуются по хешам для обновления браузерного кэша. GitHub Pages обеспечивает доверенный HTTPS: сертификат на телефоне устанавливать не нужно.
 
 Готовые файлы находятся в `WebGL/Build/`. Точный размер, контрольные суммы и результаты проверки — `reports/unity-build.json`, `reports/verification.json` и после публикации `reports/pages-verification.json`. `unity-build.json.bytes` — размер из Unity BuildReport с промежуточными результатами; для размера скачиваемых файлов используйте сумму в `verification.json.buildBytes`.
 
@@ -35,20 +37,21 @@
 1. Убедитесь, что телефон поддерживает ARCore и установлены Google Play Services for AR.
 2. Откройте https://ponchikpro3.github.io/ar-shield/ в Chrome и дождитесь модели.
 3. Нажмите «Открыть AR», разрешите использование камеры.
-4. Проверьте, что котик появляется сразу поверх камеры, без поиска поверхности. При повороте и перемещении телефона он должен оставаться по центру поля зрения.
-5. Завершите AR системной кнопкой браузера и войдите снова. Проверьте портретную/альбомную ориентацию и отказ в разрешении камеры.
-6. Запишите модель телефона, версии Android/Chrome, результат и замечания в `reports/MOBILE-TEST.md`.
+4. Медленно наведите камеру на хорошо освещённый пол или стол. Когда появится бирюзовый круг, коснитесь экрана. Котик должен стоять в отмеченном месте. Переместите телефон в сторону: котик должен остаться на поверхности, а не следовать за экраном.
+5. Наведите круг в другое место и снова коснитесь экрана: перемещается тот же котик, копии не создаются.
+6. Завершите AR системной кнопкой браузера и войдите снова. Проверьте портретную/альбомную ориентацию и отказ в разрешении камеры.
+7. Запишите модель телефона, версии Android/Chrome, результат и замечания в `reports/MOBILE-TEST.md`.
 
-17.10.2026 пользователь подтвердил на физическом Android с Chrome: «Котик виден в AR по центру». Модель телефона, версии и дополнительные сценарии не сообщены; подробности в `reports/MOBILE-TEST.md`. Изменение размера desktop viewport проверяет только компоновку.
+17.10.2026 пользователь подтвердил прежний режим viewer-space на Android Chrome: «Котик виден в AR по центру». Это не подтверждает новое размещение на поверхности; для новой версии требуется повторный тест. Модель телефона и версии не сообщены; подробности в `reports/MOBILE-TEST.md`. Изменение размера desktop viewport проверяет только компоновку.
 
 | Среда | Поведение |
 |---|---|
-| Android Chrome + ARCore + Google Play Services for AR | immersive-ar по HTTPS; требуется проверка на конкретном телефоне |
+| Android Chrome + ARCore + Google Play Services for AR + WebXR Hit Test | immersive-ar по HTTPS; требуется проверка на конкретном телефоне |
 | Desktop Chromium с WebGL 2 | обычный 3D-просмотр; AR зависит от подключённого XR-устройства |
 | Браузер без immersive-ar | 3D-просмотр, кнопка AR скрыта |
 | Safari / другие мобильные браузеры | поддержка определяется через `isSessionSupported('immersive-ar')`; без физической проверки AR не обещается |
 
-Требования: [Google WebXR](https://developers.google.com/ar/develop/webxr/requirements). Подключение WebXR и BiRP: [De-Panther Getting Started](https://github.com/De-Panther/unity-webxr-export/blob/master/Documentation/Getting-Started.md). Публикация: [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
+Требования: [Google WebXR](https://developers.google.com/ar/develop/webxr/requirements). Размещение: [Google WebXR Hit Test](https://developers.google.com/ar/develop/webxr/hello-webxr). Подключение WebXR и BiRP: [De-Panther Getting Started](https://github.com/De-Panther/unity-webxr-export/blob/master/Documentation/Getting-Started.md). Публикация: [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
 
 ## Пересборка
 
@@ -56,6 +59,7 @@
 
 ```powershell
 node tools/convert-kitty.cjs
+node --test tools/surface-session.test.cjs
 unity build .\UnityProject --editor-version 6000.3.1f1 --target WebGL --execute-method Shield.Editor.WebARBuild.Build
 ```
 

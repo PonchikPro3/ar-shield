@@ -1,7 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const https = require('node:https');
-const zlib = require('node:zlib');
 const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
 const project = path.resolve(__dirname, '..');
@@ -24,8 +23,18 @@ function request(url, method='GET') {
   assert.equal(evidence.result,'Succeeded');
   const scene=fs.readFileSync(path.join(project,'UnityProject/Assets/Scenes/ViewerSpace.unity'),'utf8');
   for (const name of ['WebXRManager','WebXRCameraSet','WebXRController LEFT','WebXRController RIGHT','CameraARL','CameraARR']) assert.ok(scene.includes(name),name);
+  assert.ok(scene.includes('AR Placement') && scene.includes('Surface Reticle'));
+  const xrSettings=fs.readFileSync(path.join(project,'UnityProject/Assets/Settings/WebXRSettings.asset'),'utf8');
+  assert.match(xrSettings,/ARRequiredReferenceSpace: 1\s/);
+  assert.match(xrSettings,/AROptionalFeatures: 1\s/);
+  const placement=JSON.parse(fs.readFileSync(path.join(project,'reports/placement-checks.json')));
+  assert.equal(placement.result,'Passed');
   const home=await request('/');assert.equal(home.status,200);
   const html=home.body.toString();assert.ok(!html.includes('{{{'));assert.ok(!html.includes('mindar'));
+  assert.ok(html.includes('surface-session.js'));
+  const bridge=await request('/surface-session.js');
+  assert.equal(bridge.status,200);
+  assert.deepEqual(bridge.body,fs.readFileSync(path.join(build,'surface-session.js')));
   const files=[];
   for (const name of fs.readdirSync(path.join(build,'Build'))) {
     assert.ok(!name.endsWith('.gz') && !name.endsWith('.br'), 'Pages build must not require Content-Encoding');
@@ -46,8 +55,8 @@ function request(url, method='GET') {
   const conversion=JSON.parse(fs.readFileSync(path.join(project,'UnityProject/Assets/Models/conversion.json')));
   assert.equal(conversion.source,'assets/sunny_kitty.glb');
   assert.equal(conversion.sha256,crypto.createHash('sha256').update(fs.readFileSync(path.join(project,conversion.source))).digest('hex'));
-  const report={date:new Date().toISOString(),url:base,unity:evidence,model:conversion,files,buildBytes:files.reduce((n,f)=>n+f.bytes,0),
-    checks:['Unity build succeeded','WebXR camera rig and two controllers saved in scene','Compression disabled for Pages','Compression fallback off','Threads off','TLS verified','WASM MIME and magic verified','Served bytes match build','Sunny Kitty GLB source hash verified'],
+  const report={date:new Date().toISOString(),url:base,unity:evidence,model:conversion,placement,files,buildBytes:files.reduce((n,f)=>n+f.bytes,0),
+    checks:['Unity build succeeded','WebXR camera rig and two controllers saved in scene','Stable local AR reference space and hit-test enabled','Surface placement logic checks passed','XR select bridge served','Compression disabled for Pages','Compression fallback off','Threads off','TLS verified','WASM MIME and magic verified','Served bytes match build','Sunny Kitty GLB source hash verified'],
     mobile:fs.existsSync(path.join(project,'reports/mobile-test.json')) ? JSON.parse(fs.readFileSync(path.join(project,'reports/mobile-test.json'))) :
       {status:'Pending physical Android Chrome test',model:null,browser:null}};
   fs.mkdirSync(path.join(project,'reports'),{recursive:true});

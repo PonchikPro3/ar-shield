@@ -23,6 +23,7 @@
   <div id="status" role="status" aria-live="polite">Загрузка сцены…</div>
   <button id="enterar" type="button" hidden disabled>Открыть AR</button>
   <small id="credit"><a href="https://sketchfab.com/3d-models/sunny-kitty-bdd7369e67f74ff89dc74273879db395" target="_blank" rel="noopener">Sunny Kitty · Ponter</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></small>
+  <script src="surface-session.js"></script>
   <script>
     var unityInstance = null;
     const canvas = document.getElementById('unity-canvas');
@@ -34,7 +35,7 @@
       if (!unityInstance || failed) return;
       enterARButton.hidden = !supported;
       enterARButton.disabled = !supported;
-      status.textContent = supported ? '' : 'Режим 3D · WebXR AR недоступен в этом браузере';
+      status.textContent = supported ? 'В AR наведите круг на пол или стол и коснитесь экрана' : 'Режим 3D · WebXR AR недоступен в этом браузере';
     }
     document.addEventListener('onARSupportedCheck', event => {
       supported = event.detail.supported;
@@ -46,6 +47,14 @@
     }
     enterARButton.addEventListener('click', () => {
       if (unityInstance && supported) unityInstance.Module.WebXR.toggleAR();
+    });
+    installSurfacePlacement(navigator.xr, {
+      select: () => unityInstance?.SendMessage('AR Placement', 'SelectSurface'),
+      failure: error => {
+        status.textContent = error.name === 'NotSupportedError' ?
+          'Для размещения нужен браузер с WebXR Hit Test' : 'AR не запущен. Проверьте разрешение камеры и попробуйте снова.';
+        console.warn('AR session: '+error.name);
+      }
     });
     var buildUrl = 'Build';
     var config = {

@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: WebXR::WebXR.WebXRSettings
   VRRequiredReferenceSpace: 2
   VROptionalFeatures: 0
-  ARRequiredReferenceSpace: 16
-  AROptionalFeatures: 0
+  ARRequiredReferenceSpace: 1
+  AROptionalFeatures: 1
   UseFramebufferScaleFactor: 0
   UseNativeResolution: 0
   FramebufferScaleFactor: 1

@@ -1,0 +1,17 @@
+{
+    "result": "Passed",
+    "scope": "Unity scene logic with simulated XR hit poses; not a physical-device AR test",
+    "checks": [
+        "No placement without a valid hit",
+        "Valid horizontal hit shows reticle without placing the model",
+        "Tap places at hit pose in transformed local reference space",
+        "Model base rests on the detected surface",
+        "Placed model stays fixed when the viewer moves and rotates",
+        "Scanning another surface does not move an already placed model",
+        "Another tap repositions the same model",
+        "Wall hit rejected; invalid tap preserves placement",
+        "Lost tracking keeps the existing placement",
+        "A new AR session clears old placement and stale hits",
+        "Leaving AR restores centered desktop preview"
+    ]
+}

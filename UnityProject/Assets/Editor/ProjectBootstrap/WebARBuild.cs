@@ -36,8 +36,8 @@ namespace Shield.Editor
                 webxr = ScriptableObject.CreateInstance<WebXRSettings>();
                 AssetDatabase.CreateAsset(webxr, "Assets/Settings/WebXRSettings.asset");
             }
-            webxr.ARRequiredReferenceSpace = WebXRSettings.ReferenceSpaceTypes.viewer;
-            webxr.AROptionalFeatures = 0;
+            webxr.ARRequiredReferenceSpace = WebXRSettings.ReferenceSpaceTypes.local;
+            webxr.AROptionalFeatures = WebXRSettings.ExtraFeatureTypes.hit_test;
             webxr.VROptionalFeatures = 0;
             webxr.DisableXRDisplaySubsystem = true;
             webxr.AutoLoadWebXRManager = false;
@@ -74,6 +74,7 @@ namespace Shield.Editor
             PlayerSettings.WebGL.initialMemorySize = 128;
             PlayerSettings.WebGL.maximumMemorySize = 512;
             PlayerSettings.WebGL.dataCaching = false;
+            PlayerSettings.WebGL.nameFilesAsHashes = true;
             PlayerSettings.runInBackground = true;
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.WebGL, ScriptingImplementation.IL2CPP);
             PlayerSettings.SetManagedStrippingLevel(NamedBuildTarget.WebGL, ManagedStrippingLevel.High);
@@ -151,13 +152,20 @@ namespace Shield.Editor
             model.transform.localPosition -= bounds.center * scale;
             var prefab = PrefabUtility.SaveAsPrefabAsset(modelRoot, "Assets/Prefabs/SunnyKitty.prefab");
             UnityEngine.Object.DestroyImmediate(modelRoot);
-            var anchor = new GameObject("Viewer Space — 1.2 m");
+            var anchor = new GameObject("AR Placement");
             anchor.transform.SetParent(manager.transform, false);
             anchor.transform.localPosition = new Vector3(0, 0, 1.2f);
             var follow = anchor.AddComponent<Shield.ViewerSpaceObject>();
             follow.cameraSet = cameraSet;
             var instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
             instance.transform.SetParent(anchor.transform, false);
+            var reticle = CreateReticle(rig.transform);
+            var placement = anchor.AddComponent<Shield.SurfacePlacement>();
+            placement.preview = follow;
+            placement.referenceSpace = rig.transform;
+            placement.model = instance.transform;
+            placement.reticle = reticle;
+            placement.baseOffset = bounds.size.y * scale * 0.5f;
             // Exercise actual follow logic with a translated and rotated camera.
             main.transform.SetPositionAndRotation(new Vector3(2, 1, -3), Quaternion.Euler(15, 55, 10));
             follow.SendMessage("LateUpdate");
@@ -168,6 +176,7 @@ namespace Shield.Editor
             main.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             follow.SendMessage("LateUpdate");
             Debug.Log("[Shield] Viewer-space position verified for a moved and rotated camera.");
+            PlacementValidation.Run(placement, main);
             EditorSceneManager.SaveScene(scene, ScenePath);
             EditorBuildSettings.scenes = new[] {new EditorBuildSettingsScene(ScenePath, true)};
             AssetDatabase.SaveAssets();
@@ -189,16 +198,44 @@ namespace Shield.Editor
             return camera;
         }
         static void SetCamera(SerializedObject data, string name, Camera value) => data.FindProperty(name).objectReferenceValue = value;
-        static void MakeLight(string name, Transform parent, Vector3 rotation, float intensity, Color color)
+        static Transform CreateReticle(Transform referenceSpace)
         {
-            var go = new GameObject(name);
-            go.transform.SetParent(parent, false);
-            go.transform.localRotation = Quaternion.Euler(rotation);
-            var light = go.AddComponent<Light>();
-            light.type = LightType.Directional;
-            light.intensity = intensity;
-            light.color = color;
-            light.shadows = LightShadows.None;
+            var mesh = AssetDatabase.LoadAssetAtPath<Mesh>("Assets/Models/PlacementRing.asset");
+            if (!mesh) {
+                mesh = new Mesh { name = "Placement Ring" };
+                const int segments = 48;
+                var vertices = new Vector3[segments * 2];
+                var triangles = new int[segments * 6];
+                for (int i = 0; i < segments; i++) {
+                    float angle = i * Mathf.PI * 2 / segments;
+                    var direction = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle));
+                    vertices[i * 2] = direction * 0.05f;
+                    vertices[i * 2 + 1] = direction * 0.057f;
+                    int next = ((i + 1) % segments) * 2;
+                    int index = i * 6;
+                    triangles[index] = i * 2; triangles[index + 1] = next; triangles[index + 2] = i * 2 + 1;
+                    triangles[index + 3] = i * 2 + 1; triangles[index + 4] = next; triangles[index + 5] = next + 1;
+                }
+                mesh.vertices = vertices;
+                mesh.triangles = triangles;
+                mesh.RecalculateBounds();
+                AssetDatabase.CreateAsset(mesh, "Assets/Models/PlacementRing.asset");
+            }
+            var material = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/PlacementRing.mat");
+            if (!material) {
+                material = new Material(Shader.Find("ARShield/KittyUnlit"));
+                material.SetColor("_Color", new Color(0.25f, 1, 0.8f));
+                AssetDatabase.CreateAsset(material, "Assets/Materials/PlacementRing.mat");
+            }
+            var go = new GameObject("Surface Reticle");
+            go.transform.SetParent(referenceSpace, false);
+            go.AddComponent<MeshFilter>().sharedMesh = mesh;
+            var renderer = go.AddComponent<MeshRenderer>();
+            renderer.sharedMaterial = material;
+            renderer.shadowCastingMode = ShadowCastingMode.Off;
+            renderer.receiveShadows = false;
+            go.SetActive(false);
+            return go.transform;
         }
 
         [MenuItem("Shield/Build WebGL")]
@@ -218,7 +255,9 @@ namespace Shield.Editor
                 errors = report.summary.totalErrors, warnings = report.summary.totalWarnings
             }, true));
             if (report.summary.result != BuildResult.Succeeded) throw new Exception("WebGL build failed");
-            foreach (var obsolete in Directory.GetFiles(Path.Combine(output, "Build"), "*.gz")) File.Delete(obsolete);
+            string page = File.ReadAllText(Path.Combine(output, "index.html"));
+            foreach (var obsolete in Directory.GetFiles(Path.Combine(output, "Build")))
+                if (!page.Contains(Path.GetFileName(obsolete))) File.Delete(obsolete);
             File.WriteAllText(Path.Combine(output, ".nojekyll"), "");
             File.Copy("../assets/SUNNY-KITTY-LICENSE.md", Path.Combine(output, "SUNNY-KITTY-LICENSE.md"), true);
             Debug.Log("[Shield] Build succeeded: " + report.summary.totalSize + " bytes.");
