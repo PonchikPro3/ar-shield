@@ -1,3 +1,18 @@
 # Исходный STL не нужен на GitHub Pages (174 МБ > лимита 100 МБ на файл,
 # и страница его не использует — только сконвертированные glb/usdz)
 assets/shield.stl
+
+# Unity generated state
+UnityProject/[Ll]ibrary/
+UnityProject/[Tt]emp/
+UnityProject/[Oo]bj/
+UnityProject/[Ll]ogs/
+UnityProject/[Uu]ser[Ss]ettings/
+UnityProject/.vs/
+UnityProject/*.csproj
+UnityProject/*.sln*
+tools/node_modules/
+.certs/
+*.log
+build.provenance.json
+UnityProject/.vscode/

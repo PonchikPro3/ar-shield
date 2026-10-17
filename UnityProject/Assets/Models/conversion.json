@@ -1,0 +1,14 @@
+{
+  "source": "assets/sunny_kitty.glb",
+  "sha256": "78643a0c6fbb624001ba7c06b1ab3320779afba82bcdedc6b589071581eddbfb",
+  "vertices": 2114,
+  "triangles": 3528,
+  "simplified": false,
+  "textureBytes": 908252,
+  "attribution": {
+    "author": "Ponter (https://sketchfab.com/ponter)",
+    "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+    "source": "https://sketchfab.com/3d-models/sunny-kitty-bdd7369e67f74ff89dc74273879db395",
+    "title": "Sunny Kitty"
+  }
+}

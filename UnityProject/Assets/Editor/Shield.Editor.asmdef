@@ -1,0 +1,6 @@
+{
+  "name": "Shield.Editor",
+  "references": ["Shield.Runtime", "WebXR", "WebXR.Editor", "Unity.XR.Management", "Unity.XR.Management.Editor", "UnityEngine.SpatialTracking"],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": true
+}

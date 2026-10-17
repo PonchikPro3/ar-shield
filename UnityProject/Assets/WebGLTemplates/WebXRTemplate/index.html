@@ -1,0 +1,76 @@
+<!doctype html>
+<!-- Adapted from De-Panther WebXRFullView2020 (Apache-2.0), version 0.25.0. -->
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#090c0f">
+  <title>Sunny Kitty · WebXR</title>
+  <style>
+    * { box-sizing: border-box; }
+    html,body { margin:0; width:100%; height:100%; overflow:hidden; background:#090c0f; color:#e3e9ed; font:14px system-ui,sans-serif; }
+    #unity-canvas { width:100%; height:100%; display:block; outline:none; }
+    #status { position:fixed; top:max(20px,env(safe-area-inset-top)); left:20px; right:20px; text-align:center; color:#a6b4c0; pointer-events:none; }
+    #enterar { position:fixed; left:50%; transform:translateX(-50%); bottom:max(24px,env(safe-area-inset-bottom)); padding:14px 28px; border:1px solid #7a929f; border-radius:32px; background:#e3ebef; color:#101a20; font:600 15px system-ui; cursor:pointer; }
+    #enterar[hidden] { display:none; }
+    #credit { position:fixed; bottom:5px; right:8px; font-size:10px; color:#83919a; }
+    #credit a { color:inherit; }
+  </style>
+</head>
+<body>
+  <canvas id="unity-canvas" tabindex="0" aria-label="Sunny Kitty в центре поля зрения"></canvas>
+  <!-- Sunny Kitty by Ponter, CC-BY-4.0: attribution available in SUNNY-KITTY-LICENSE.md. -->
+  <div id="status" role="status" aria-live="polite">Загрузка сцены…</div>
+  <button id="enterar" type="button" hidden disabled>Открыть AR</button>
+  <small id="credit"><a href="https://sketchfab.com/3d-models/sunny-kitty-bdd7369e67f74ff89dc74273879db395" target="_blank" rel="noopener">Sunny Kitty · Ponter</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></small>
+  <script>
+    var unityInstance = null;
+    const canvas = document.getElementById('unity-canvas');
+    const status = document.getElementById('status');
+    const enterARButton = document.getElementById('enterar');
+    let supported = false;
+    let failed = false;
+    function updateStatus() {
+      if (!unityInstance || failed) return;
+      enterARButton.hidden = !supported;
+      enterARButton.disabled = !supported;
+      status.textContent = supported ? '' : 'Режим 3D · WebXR AR недоступен в этом браузере';
+    }
+    document.addEventListener('onARSupportedCheck', event => {
+      supported = event.detail.supported;
+      updateStatus();
+    });
+    // Browser support check also covers browsers with no navigator.xr at all.
+    if (window.isSecureContext && navigator.xr) {
+      navigator.xr.isSessionSupported('immersive-ar').then(value => {supported=value; updateStatus();}).catch(()=>updateStatus());
+    }
+    enterARButton.addEventListener('click', () => {
+      if (unityInstance && supported) unityInstance.Module.WebXR.toggleAR();
+    });
+    var buildUrl = 'Build';
+    var config = {
+      dataUrl: buildUrl + '/{{{ DATA_FILENAME }}}',
+      frameworkUrl: buildUrl + '/{{{ FRAMEWORK_FILENAME }}}',
+      codeUrl: buildUrl + '/{{{ CODE_FILENAME }}}',
+      streamingAssetsUrl: 'StreamingAssets',
+      companyName: '{{{ COMPANY_NAME }}}',
+      productName: '{{{ PRODUCT_NAME }}}',
+      productVersion: '{{{ PRODUCT_VERSION }}}',
+      devicePixelRatio: Math.min(window.devicePixelRatio || 1, 1.5),
+      showBanner: (message, type) => {
+        if (type === 'error') { failed=true; status.textContent='Ошибка запуска: '+message; console.error(message); }
+      }
+    };
+    {{{ WEBXR_POLYFILL_CONFIG }}}
+    const script = document.createElement('script');
+    script.src = buildUrl + '/{{{ LOADER_FILENAME }}}';
+    script.onerror = () => {failed=true; status.textContent='Не удалось загрузить сборку. Проверьте HTTPS-сервер.';};
+    script.onload = () => createUnityInstance(canvas, config, progress => {
+      if (!failed) status.textContent='Загрузка сцены · '+Math.round(progress*100)+'%';
+    }).then(instance => {unityInstance=instance; updateStatus();}).catch(error => {
+      failed=true; status.textContent='Ошибка запуска сцены: '+error; console.error(error);
+    });
+    document.body.appendChild(script);
+  </script>
+</body>
+</html>

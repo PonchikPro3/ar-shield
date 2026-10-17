@@ -1,0 +1,5 @@
+{
+  "desktop": {"browser":"Codex in-app Chromium", "url":"http://localhost:8080/", "modelVisible":true, "textureVisible":true, "arButtonHiddenWhenUnsupported":true, "consoleErrors":0, "consoleWarnings":0},
+  "portraitLayout": {"viewportWidth":390,"viewportHeight":844,"canvasWidth":488,"canvasHeight":1055,"modelVisibleAndCentered":true,"screenshot":"portrait-layout.jpg"},
+  "physicalMobileTest":"Pending user result from Android Chrome; viewport test is not a physical-device test."
+}

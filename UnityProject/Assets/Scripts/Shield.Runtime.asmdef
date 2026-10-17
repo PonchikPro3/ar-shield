@@ -1,0 +1,5 @@
+{
+  "name": "Shield.Runtime",
+  "references": ["WebXR"],
+  "autoReferenced": true
+}

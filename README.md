@@ -1,89 +1,89 @@
-# AR-страница с 3D-моделью (model-viewer)
+# Sunny Kitty — Unity WebXR (задание 6)
 
-Демо-страница с размещением 3D-модели в дополненной реальности через
-[`<model-viewer>`](https://modelviewer.dev).
+**Приложение GitHub Pages:** https://ponchikpro3.github.io/ar-shield/
 
-**Опубликована на GitHub Pages:** <https://ponchikpro3.github.io/ar-shield/>
-(HTTPS из коробки — AR на телефоне работает сразу: откройте ссылку в
-Chrome на Android или Safari на iPhone).
+Прежняя страница MindAR заменена сценой Unity с WebXR Export от De-Panther. Используется **`assets/sunny_kitty.glb`**, скопированный из ассетов проекта без изменений. Модель видна сразу после загрузки, по центру, на расстоянии 1,2 м перед активной камерой. В AR она следует за направлением взгляда (viewer-space), без поиска поверхности и касаний для размещения.
 
-## Структура проекта
+Интерфейс: кнопка «Открыть AR» на совместимом устройстве; прогресс во время загрузки; короткое сообщение о 3D-режиме, если immersive-ar недоступен; маленькая обязательная атрибуция модели. Вход в AR требует действия пользователя по правилам браузера.
 
-```
-ar-page/
-├── index.html                  — страница с <model-viewer>
-├── server.ps1                  — локальный HTTP-сервер (PowerShell, без зависимостей)
-├── start-server.bat            — запуск сервера двойным кликом
-├── README.md
-└── assets/
-    ├── shield.stl              — исходная модель (174 МБ, 3,5 млн треугольников)
-    ├── shield.glb              — AR-версия в glTF (конвертация из STL: нормализация
-    │                             масштаба, прореживание до ~450 тыс. полигонов,
-    │                             стальной материал, Draco-сжатие)
-    ├── shield.usdz             — та же модель в USDZ для Quick Look на iOS
-    └── lightroom_14b.hdr       — HDRI-карта окружения для освещения модели
-```
+## Реализация
 
-## Откуда взялись GLB и USDZ
+- Unity **6000.3.1f1**, Built-in Render Pipeline, WebGL 2, IL2CPP, Linear Color Space.
+- `UnityProject/Assets/Scenes/ViewerSpace.unity` — единственная сцена сборки.
+- В сцене: `WebXRManager`, `WebXRCameraSet`, `WebXRCamera`, `TrackedPoseDriver`, основная камера, камеры AR/VR и два `WebXRController` без визуальных моделей контроллеров.
+- Раскладка камер повторяет BiRP-вариант WebXRCameraSet из De-Panther. WebXRLoader включён через XR Plug-in Management.
+- Для BiRP включён `DisableXRDisplaySubsystem`. Reference space AR — `viewer`; hit-test, hand tracking, HDR, тени и постэффекты отключены.
+- `Assets/Scripts/ViewerSpaceObject.cs` обновляет положение перед активной камерой; поддерживает смену режима и усреднение глаз для двух видов. Генератор сцены проверяет центр viewport на перемещённой и повёрнутой камере.
+- `Assets/Prefabs/SunnyKitty.prefab` — статическая модель с исходной текстурой. 2 114 вершин, 3 528 треугольников, упрощение не применялось. UV и нормали перенесены из GLB; материал Unlit и двусторонний, как в оригинале.
+- `Vendor/webxr` и `Vendor/webxr-interactions` — официальные пакеты De-Panther **0.25.0**, commit `1f7a06c57867f300dabfa2bbbee85a6b03fa0005`. Лицензия: `Vendor/LICENSE`.
+- `Assets/WebGLTemplates/WebXRTemplate/` — минимальная адаптация официального **WebXRFullView2020**, с сохранением инициализации Unity и событий WebXR. В текущем репозитории нет шаблона с буквальным именем WebXRTemplate; это локальное имя адаптации.
 
-`<model-viewer>` не читает STL напрямую — он работает только с glTF/GLB (веб +
-Scene Viewer) и USDZ (Quick Look). Исходный `shield.stl` конвертирован в оба
-формата headless-Blender'ом (см. `../tools/convert_shield.py`):
+Все пути `Assets/...` выше находятся внутри `UnityProject`.
 
-- масштаб нормализован до реальных метров (наибольшая сторона — 0,8 м,
-  как у обычного щита; STL не хранит единицы измерения);
-- меш прорежен с 3,5 млн до ~450 тыс. треугольников — 174 МБ STL не тянут
-  мобильные AR-просмотрщики;
-- назначен простой стальной PBR-материал (STL не хранит материалы);
-- GLB дополнительно сжат Draco.
+## GitHub Pages
 
-Скрипт можно перезапустить с другими параметрами (размер, число полигонов):
+Сайт настроен на **Deploy from a branch → main → /(root)**. Корневой `index.html` перенаправляет в `WebGL/`, где находится готовая сборка. `.nojekyll` отключает обработку Jekyll. Зависимости Unity и исходные ассеты не запрашиваются приложением во время запуска.
 
-```
-blender -b --python convert_shield.py -- shield.stl shield.glb shield.usdz 0.8 450000
-```
+**Compression Format: Disabled; Decompression Fallback: OFF; Threads Support: OFF.** Поэтому обычные `.data`, `.js`, `.wasm` работают на GitHub Pages без специальных заголовков `Content-Encoding`, COOP/COEP и compression fallback. Все пути относительные и учитывают префикс `/ar-shield/`. GitHub Pages обеспечивает доверенный HTTPS: сертификат на телефоне устанавливать не нужно.
 
-## Как соответствуют требования
+Готовые файлы находятся в `WebGL/Build/`. Точный размер, контрольные суммы и результаты проверки — `reports/unity-build.json`, `reports/verification.json` и после публикации `reports/pages-verification.json`. `unity-build.json.bytes` — размер из Unity BuildReport с промежуточными результатами; для размера скачиваемых файлов используйте сумму в `verification.json.buildBytes`.
 
-| Требование | Где реализовано |
+Примечание: HTTP-сжатие самим CDN может отличаться от размера файлов. Первое открытие требует загрузки WebAssembly; повторное открытие может использовать браузерный кэш GitHub Pages.
+
+## Проверка Android Chrome
+
+1. Убедитесь, что телефон поддерживает ARCore и установлены Google Play Services for AR.
+2. Откройте https://ponchikpro3.github.io/ar-shield/ в Chrome и дождитесь модели.
+3. Нажмите «Открыть AR», разрешите использование камеры.
+4. Проверьте, что котик появляется сразу поверх камеры, без поиска поверхности. При повороте и перемещении телефона он должен оставаться по центру поля зрения.
+5. Завершите AR системной кнопкой браузера и войдите снова. Проверьте портретную/альбомную ориентацию и отказ в разрешении камеры.
+6. Запишите модель телефона, версии Android/Chrome, результат и замечания в `reports/MOBILE-TEST.md`.
+
+Физическая проверка не считается проведённой до получения результата с телефона. Изменение размера desktop viewport проверяет только компоновку.
+
+| Среда | Поведение |
 |---|---|
-| 3D-модель в AR через `<model-viewer>` | `index.html`, тег `<model-viewer>` |
-| Режимы AR (`ar`, `ar-modes`) | атрибуты `ar` и `ar-modes="webxr scene-viewer quick-look"` |
-| Quick Look (iOS) | атрибут `ios-src="assets/shield.usdz"` + `quick-look` в `ar-modes` |
-| Scene Viewer (Android) | `src="assets/shield.glb"` + `scene-viewer` в `ar-modes` |
-| Форматы glTF и USDZ | `assets/shield.glb`, `assets/shield.usdz` |
-| HDRI-освещение | `environment-image="assets/lightroom_14b.hdr"` |
+| Android Chrome + ARCore + Google Play Services for AR | immersive-ar по HTTPS; требуется проверка на конкретном телефоне |
+| Desktop Chromium с WebGL 2 | обычный 3D-просмотр; AR зависит от подключённого XR-устройства |
+| Браузер без immersive-ar | 3D-просмотр, кнопка AR скрыта |
+| Safari / другие мобильные браузеры | поддержка определяется через `isSessionSupported('immersive-ar')`; без физической проверки AR не обещается |
 
-## Запуск
+Требования: [Google WebXR](https://developers.google.com/ar/develop/webxr/requirements). Подключение WebXR и BiRP: [De-Panther Getting Started](https://github.com/De-Panther/unity-webxr-export/blob/master/Documentation/Getting-Started.md). Публикация: [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
 
-AR и камера работают только из **secure context**: `https://` или `http://localhost`.
-Открытие `index.html` двойным кликом (протокол `file://`) не подойдёт.
+## Пересборка
 
-### Локально (этот компьютер)
+Откройте `UnityProject` в Unity 6000.3.1f1 с модулем WebGL. Меню **Shield → Build WebGL** пересоздаёт сцену, сохраняет настройки и экспортирует `WebGL/`. Для ручных изменений сцены используйте обычный Build: генератор при следующем запуске перезапишет сцену.
 
-1. Запустите `start-server.bat` (двойной клик) — поднимется сервер на `http://localhost:8080`.
-2. Откройте в браузере <http://localhost:8080/>.
+```powershell
+node tools/convert-kitty.cjs
+unity build .\UnityProject --editor-version 6000.3.1f1 --target WebGL --execute-method Shield.Editor.WebARBuild.Build
+```
 
-Вращение модели — мышью/стрелками, зум — колесом.
+Конвертер использует только стандартную библиотеку Node.js; декодирование GLB происходит до сборки. Изменение размера и центрирование выполняются в сцене. Источник, SHA-256 и лицензия записаны в `UnityProject/Assets/Models/conversion.json`.
 
-### С телефона (нужен HTTPS)
+Для обновления GitHub Pages загрузите изменения сборки вместе с `index.html` и `.nojekyll` в `main`; дождитесь завершения `pages build and deployment`.
 
-Телефон обращается к вашему компьютеру по имени/IP — это уже не `localhost`,
-поэтому обязателен HTTPS (самоподписанный сертификат подойдёт для проверки,
-но его нужно принять на телефоне). Варианты:
+## Дополнительный локальный HTTPS
 
-- **Node.js**: `npx serve .` — затем туннель `npx localtunnel --port 3000`
-  или `cloudflared tunnel --url http://localhost:3000` (даёт публичный HTTPS-URL).
-- **ngrok**: запустить любой локальный сервер и `ngrok http 8080` — получите HTTPS-URL.
-- Любой HTTPS-хостинг (GitHub Pages, Netlify и т.п.) — просто загрузите папку целиком.
+Для выполнения локальной части задания сохранён `start-server.bat` / `server.ps1`. Нужны Node.js и Python с `cryptography`; на этом компьютере используется встроенный Python Codex. На другом компьютере: `python -m pip install cryptography`.
 
-## Проверка AR
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\server.ps1
+node tools/verify-build.cjs
+```
 
-- **Android** (Chrome, поддержка ARCore): кнопка **View in your space** открывает
-  Scene Viewer, модель размещается на поверхности.
-- **iOS / iPadOS** (Safari): та же кнопка открывает Quick Look с `Astronaut.usdz`.
-- **Десктоп**: кнопка AR скрыта (нет поддержки AR), модель можно крутить и приближать.
+- HTTPS: https://localhost:8443/.
+- Desktop preview без установки сертификата: http://localhost:8080/ (loopback — secure context).
+- Для телефона в той же Wi-Fi-сети: `https://IP-КОМПЬЮТЕРА:8443/`; сначала установите `.certs/rootCA.cer` как доверенный CA. Для GitHub Pages этот шаг не нужен.
 
-На десктопе AR также можно включить через эмуляцию: Chrome DevTools →
-Sensors → отключить/изменить флаги WebXR, либо открыть страницу в Chrome
-с флагом `--enable-features=WebXRIncubations`.
+Сертификат содержит IP на момент создания и действует 30 дней. При смене адреса: `server.ps1 -RegenerateCertificate`. Сервер автоматически не меняет настройки доверия Windows/Android. `.certs/` исключена из Git; сервер выдаёт только публичный сертификат по `/ca.cer`, приватные файлы недоступны. Приватный ключ CA не сохраняется.
+
+Проверка опубликованных файлов:
+
+```powershell
+node tools/verify-build.cjs https://ponchikpro3.github.io/ar-shield/WebGL/
+```
+
+## Модель и лицензия
+
+**Sunny Kitty** — [Ponter](https://sketchfab.com/ponter), [исходная модель](https://sketchfab.com/3d-models/sunny-kitty-bdd7369e67f74ff89dc74273879db395), [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Атрибуция взята из метаданных GLB. Подробности преобразования — `assets/SUNNY-KITTY-LICENSE.md`; копия включена в сайт.

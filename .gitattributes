@@ -1,0 +1,6 @@
+WebGL/** -text
+*.glb -text
+*.png -text
+*.jpg -text
+*.wasm -text
+*.data -text

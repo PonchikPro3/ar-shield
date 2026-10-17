@@ -1,0 +1,12 @@
+{
+    "result": "Succeeded",
+    "unity": "6000.3.1f1",
+    "webxr": "0.25.0",
+    "compression": "Disabled (GitHub Pages)",
+    "bytes": 62973373,
+    "seconds": 4.0172419999999999,
+    "decompressionFallback": false,
+    "threads": false,
+    "errors": 0,
+    "warnings": 0
+}
