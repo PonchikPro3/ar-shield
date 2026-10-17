@@ -1,6 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const https = require('node:https');
+const zlib = require('node:zlib');
 const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
 const project = path.resolve(__dirname, '..');
@@ -9,9 +10,13 @@ const base = process.argv[2] || 'https://localhost:8443/';
 const isLocal = new URL(base).hostname === 'localhost';
 const ca = isLocal ? new crypto.X509Certificate(fs.readFileSync(path.join(project,'.certs/rootCA.cer'))).toString() : undefined;
 function request(url, method='GET') {
-  return new Promise((resolve,reject)=>https.get(new URL(url.replace(/^\//,''),base),{ca,method},res=>{
+  return new Promise((resolve,reject)=>https.get(new URL(url.replace(/^\//,''),base),{ca,method,headers:{'Accept-Encoding':'gzip'}},res=>{
     const chunks=[];res.on('data',c=>chunks.push(c));
-    res.on('end',()=>resolve({status:res.statusCode,headers:res.headers,body:Buffer.concat(chunks)}));
+    res.on('end',()=>{
+      const body=Buffer.concat(chunks);
+      try {resolve({status:res.statusCode,headers:res.headers,body:res.headers['content-encoding']==='gzip'?zlib.gunzipSync(body):body});}
+      catch(error) {reject(error);}
+    });
   }).on('error',reject));
 }
 (async()=>{

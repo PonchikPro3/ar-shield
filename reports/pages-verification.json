@@ -1,13 +1,13 @@
 {
-  "date": "2026-10-17T06:33:04.963Z",
+  "date": "2026-10-17T06:44:09.095Z",
   "url": "https://ponchikpro3.github.io/ar-shield/WebGL/",
   "unity": {
     "result": "Succeeded",
     "unity": "6000.3.1f1",
     "webxr": "0.25.0",
     "compression": "Disabled (GitHub Pages)",
-    "bytes": 62973373,
-    "seconds": 4.0172419999999995,
+    "bytes": 62946729,
+    "seconds": 8.109725599999999,
     "decompressionFallback": false,
     "threads": false,
     "errors": 0,
@@ -27,32 +27,52 @@
       "title": "Sunny Kitty"
     }
   },
+  "placement": {
+    "result": "Passed",
+    "scope": "Unity scene logic with simulated XR hit poses; not a physical-device AR test",
+    "checks": [
+      "No placement without a valid hit",
+      "Valid horizontal hit shows reticle without placing the model",
+      "Tap places at hit pose in transformed local reference space",
+      "Model base rests on the detected surface",
+      "Placed model stays fixed when the viewer moves and rotates",
+      "Scanning another surface does not move an already placed model",
+      "Another tap repositions the same model",
+      "Wall hit rejected; invalid tap preserves placement",
+      "Lost tracking keeps the existing placement",
+      "A new AR session clears old placement and stale hits",
+      "Leaving AR restores centered desktop preview"
+    ]
+  },
   "files": [
     {
-      "name": "WebGL.data",
-      "bytes": 6209564,
-      "sha256": "5d2208ca75156c44938486d79e9d74e26cc4eb48d6b2569f4a32e73e5f7de6e0"
-    },
-    {
-      "name": "WebGL.framework.js",
-      "bytes": 482351,
-      "sha256": "7db7f4e9a8c18696eebe9e03e8efd33398d2b9fb6377f9ab005573a41abc082d"
-    },
-    {
-      "name": "WebGL.loader.js",
+      "name": "2db850192a843c6dbcc5845787ef58bb.loader.js",
       "bytes": 19430,
-      "sha256": "35f7eafddcf7df50603017500a6bf19cef67b27242cebb322313970cd75b41d8"
+      "sha256": "a91e8b8e3b4ffaffd3ed900d5ed68c02fb67013d26bd68834c935db2c07ba5c3"
     },
     {
-      "name": "WebGL.wasm",
-      "bytes": 31574538,
-      "sha256": "674006386b4aebd1396257326ef211f3febedd7105f595f903c899a7ad89b15d"
+      "name": "797a91db1b67b70cf917952b7493f7be.data",
+      "bytes": 6212792,
+      "sha256": "9a433e89ceee9958e391ee8c89b3151e149a76b8ecc8220226b45cb34c5aacce"
+    },
+    {
+      "name": "b1fed84eb91106658328e0561fb4418b.wasm",
+      "bytes": 31577763,
+      "sha256": "e26916b681604c886aa6950ea15772737176ea47095208bd5c8e95a66534823a"
+    },
+    {
+      "name": "d8e715f7002e376d512202bb8a16b748.framework.js",
+      "bytes": 482351,
+      "sha256": "a6c1f739f91de064957d40084e3313230472301766d0eb7f4fd9d8b31edacf65"
     }
   ],
-  "buildBytes": 38285883,
+  "buildBytes": 38292336,
   "checks": [
     "Unity build succeeded",
     "WebXR camera rig and two controllers saved in scene",
+    "Stable local AR reference space and hit-test enabled",
+    "Surface placement logic checks passed",
+    "XR select bridge served",
     "Compression disabled for Pages",
     "Compression fallback off",
     "Threads off",
@@ -62,24 +82,35 @@
     "Sunny Kitty GLB source hash verified"
   ],
   "mobile": {
-    "status": "AR entry and centered Sunny Kitty confirmed by user on a physical Android Chrome device",
+    "status": "Basic surface placement and stable position while moving the phone confirmed by user on Android Chrome",
     "date": "2026-10-17",
-    "url": "https://ponchikpro3.github.io/ar-shield/",
-    "evidenceSource": "User reply in this chat: Котик виден в AR по центру",
+    "url": "https://ponchikpro3.github.io/ar-shield/WebGL/?v=surface-1",
+    "evidenceSource": "User response to the surface-placement test: Да, котик стоит на поверхности",
     "os": "Android",
     "browser": "Chrome",
     "deviceModel": null,
     "osVersion": null,
     "browserVersion": null,
     "checks": {
-      "arEntry": true,
-      "modelVisibleInAR": true,
-      "centeredInAR": true,
-      "movementTracking": null,
-      "orientationChange": null,
-      "exitAndReentry": null,
-      "cameraPermissionDenial": null
+      "surfaceDetected": true,
+      "modelPlacedOnSurface": true,
+      "staysFixedWhenPhoneMoves": true,
+      "repositionByTap": null,
+      "exitAndReentry": null
     },
-    "limitations": "Device and browser versions, performance, movement, orientation and reentry results were not supplied. No direct agent access to the phone."
+    "limitations": "Phone model, Android/Chrome versions, performance, repeated placement, orientation and reentry were not reported. The agent has no direct access to the phone; basic surface placement was confirmed by the user.",
+    "previousViewerSpaceTest": {
+      "status": "AR entry and centered Sunny Kitty confirmed by user on a physical Android Chrome device",
+      "evidenceSource": "User reply in this chat: Котик виден в AR по центру",
+      "checks": {
+        "arEntry": true,
+        "modelVisibleInAR": true,
+        "centeredInAR": true,
+        "movementTracking": null,
+        "orientationChange": null,
+        "exitAndReentry": null,
+        "cameraPermissionDenial": null
+      }
+    }
   }
 }

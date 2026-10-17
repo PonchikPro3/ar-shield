@@ -16,17 +16,18 @@
     "modelVisibleAndCentered": true,
     "screenshot": "portrait-layout.jpg"
   },
-  "physicalMobileTest": "Previous viewer-space mode confirmed by user; current surface-placement mode needs a new physical-device test.",
+  "physicalMobileTest": "User confirmed Sunny Kitty stays on the detected surface when moving the phone in Android Chrome.",
   "published": {
-    "url": "https://ponchikpro3.github.io/ar-shield/WebGL/",
+    "url": "https://ponchikpro3.github.io/ar-shield/WebGL/?v=surface-1",
     "modelVisible": true,
     "textureVisible": true,
     "consoleErrors": 0,
-    "consoleWarnings": 0
+    "consoleWarnings": 0,
+    "screenshot": "placement-pages-preview.jpg"
   },
   "surfacePlacement": {
     "unityLogicChecks": 11,
     "xrSessionBridgeChecks": 4,
-    "physicalDeviceStatus": "Pending new surface-placement test"
+    "physicalDeviceStatus": "Basic surface placement and stable position confirmed by user"
   }
 }
