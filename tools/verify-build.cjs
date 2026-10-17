@@ -48,7 +48,8 @@ function request(url, method='GET') {
   assert.equal(conversion.sha256,crypto.createHash('sha256').update(fs.readFileSync(path.join(project,conversion.source))).digest('hex'));
   const report={date:new Date().toISOString(),url:base,unity:evidence,model:conversion,files,buildBytes:files.reduce((n,f)=>n+f.bytes,0),
     checks:['Unity build succeeded','WebXR camera rig and two controllers saved in scene','Compression disabled for Pages','Compression fallback off','Threads off','TLS verified','WASM MIME and magic verified','Served bytes match build','Sunny Kitty GLB source hash verified'],
-    mobile:{status:'Pending physical Android Chrome test',model:null,browser:null}};
+    mobile:fs.existsSync(path.join(project,'reports/mobile-test.json')) ? JSON.parse(fs.readFileSync(path.join(project,'reports/mobile-test.json'))) :
+      {status:'Pending physical Android Chrome test',model:null,browser:null}};
   fs.mkdirSync(path.join(project,'reports'),{recursive:true});
   fs.writeFileSync(path.join(project,isLocal?'reports/verification.json':'reports/pages-verification.json'),JSON.stringify(report,null,2));
   console.log(JSON.stringify(report,null,2));

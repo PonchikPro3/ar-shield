@@ -1,0 +1,85 @@
+{
+  "date": "2026-10-17T06:33:04.963Z",
+  "url": "https://ponchikpro3.github.io/ar-shield/WebGL/",
+  "unity": {
+    "result": "Succeeded",
+    "unity": "6000.3.1f1",
+    "webxr": "0.25.0",
+    "compression": "Disabled (GitHub Pages)",
+    "bytes": 62973373,
+    "seconds": 4.0172419999999995,
+    "decompressionFallback": false,
+    "threads": false,
+    "errors": 0,
+    "warnings": 0
+  },
+  "model": {
+    "source": "assets/sunny_kitty.glb",
+    "sha256": "78643a0c6fbb624001ba7c06b1ab3320779afba82bcdedc6b589071581eddbfb",
+    "vertices": 2114,
+    "triangles": 3528,
+    "simplified": false,
+    "textureBytes": 908252,
+    "attribution": {
+      "author": "Ponter (https://sketchfab.com/ponter)",
+      "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+      "source": "https://sketchfab.com/3d-models/sunny-kitty-bdd7369e67f74ff89dc74273879db395",
+      "title": "Sunny Kitty"
+    }
+  },
+  "files": [
+    {
+      "name": "WebGL.data",
+      "bytes": 6209564,
+      "sha256": "5d2208ca75156c44938486d79e9d74e26cc4eb48d6b2569f4a32e73e5f7de6e0"
+    },
+    {
+      "name": "WebGL.framework.js",
+      "bytes": 482351,
+      "sha256": "7db7f4e9a8c18696eebe9e03e8efd33398d2b9fb6377f9ab005573a41abc082d"
+    },
+    {
+      "name": "WebGL.loader.js",
+      "bytes": 19430,
+      "sha256": "35f7eafddcf7df50603017500a6bf19cef67b27242cebb322313970cd75b41d8"
+    },
+    {
+      "name": "WebGL.wasm",
+      "bytes": 31574538,
+      "sha256": "674006386b4aebd1396257326ef211f3febedd7105f595f903c899a7ad89b15d"
+    }
+  ],
+  "buildBytes": 38285883,
+  "checks": [
+    "Unity build succeeded",
+    "WebXR camera rig and two controllers saved in scene",
+    "Compression disabled for Pages",
+    "Compression fallback off",
+    "Threads off",
+    "TLS verified",
+    "WASM MIME and magic verified",
+    "Served bytes match build",
+    "Sunny Kitty GLB source hash verified"
+  ],
+  "mobile": {
+    "status": "AR entry and centered Sunny Kitty confirmed by user on a physical Android Chrome device",
+    "date": "2026-10-17",
+    "url": "https://ponchikpro3.github.io/ar-shield/",
+    "evidenceSource": "User reply in this chat: Котик виден в AR по центру",
+    "os": "Android",
+    "browser": "Chrome",
+    "deviceModel": null,
+    "osVersion": null,
+    "browserVersion": null,
+    "checks": {
+      "arEntry": true,
+      "modelVisibleInAR": true,
+      "centeredInAR": true,
+      "movementTracking": null,
+      "orientationChange": null,
+      "exitAndReentry": null,
+      "cameraPermissionDenial": null
+    },
+    "limitations": "Device and browser versions, performance, movement, orientation and reentry results were not supplied. No direct agent access to the phone."
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "status": "AR entry and centered Sunny Kitty confirmed by user on a physical Android Chrome device",
+  "date": "2026-10-17",
+  "url": "https://ponchikpro3.github.io/ar-shield/",
+  "evidenceSource": "User reply in this chat: Котик виден в AR по центру",
+  "os": "Android",
+  "browser": "Chrome",
+  "deviceModel": null,
+  "osVersion": null,
+  "browserVersion": null,
+  "checks": {
+    "arEntry": true,
+    "modelVisibleInAR": true,
+    "centeredInAR": true,
+    "movementTracking": null,
+    "orientationChange": null,
+    "exitAndReentry": null,
+    "cameraPermissionDenial": null
+  },
+  "limitations": "Device and browser versions, performance, movement, orientation and reentry results were not supplied. No direct agent access to the phone."
+}
