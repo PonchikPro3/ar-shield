@@ -10,14 +10,13 @@ namespace Shield
     {
         public WebXRCamera cameraSet;
         [Min(0.2f)] public float distance = 1.2f;
-        public bool followViewer = true;
 
         void Start() => FollowViewer();
         void LateUpdate() => FollowViewer();
 
         void FollowViewer()
         {
-            if (!followViewer || !cameraSet) return;
+            if (!cameraSet) return;
             var manager = WebXRManager.Instance;
             var state = manager ? manager.XRState : WebXRState.NORMAL;
             var id = state == WebXRState.AR ? WebXRCamera.CameraID.LeftAR :

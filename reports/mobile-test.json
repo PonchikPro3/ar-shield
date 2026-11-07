@@ -1,32 +1,21 @@
 {
-  "status": "Basic surface placement and stable position while moving the phone confirmed by user on Android Chrome",
+  "status": "AR entry and centered Sunny Kitty confirmed by user on a physical Android Chrome device",
   "date": "2026-10-17",
-  "url": "https://ponchikpro3.github.io/ar-shield/WebGL/?v=surface-1",
-  "evidenceSource": "User response to the surface-placement test: Да, котик стоит на поверхности",
+  "url": "https://ponchikpro3.github.io/ar-shield/",
+  "evidenceSource": "User reply in this chat: Котик виден в AR по центру",
   "os": "Android",
   "browser": "Chrome",
   "deviceModel": null,
   "osVersion": null,
   "browserVersion": null,
   "checks": {
-    "surfaceDetected": true,
-    "modelPlacedOnSurface": true,
-    "staysFixedWhenPhoneMoves": true,
-    "repositionByTap": null,
-    "exitAndReentry": null
+    "arEntry": true,
+    "modelVisibleInAR": true,
+    "centeredInAR": true,
+    "movementTracking": null,
+    "orientationChange": null,
+    "exitAndReentry": null,
+    "cameraPermissionDenial": null
   },
-  "limitations": "Phone model, Android/Chrome versions, performance, repeated placement, orientation and reentry were not reported. The agent has no direct access to the phone; basic surface placement was confirmed by the user.",
-  "previousViewerSpaceTest": {
-    "status": "AR entry and centered Sunny Kitty confirmed by user on a physical Android Chrome device",
-    "evidenceSource": "User reply in this chat: Котик виден в AR по центру",
-    "checks": {
-      "arEntry": true,
-      "modelVisibleInAR": true,
-      "centeredInAR": true,
-      "movementTracking": null,
-      "orientationChange": null,
-      "exitAndReentry": null,
-      "cameraPermissionDenial": null
-    }
-  }
+  "limitations": "Device and browser versions, performance, movement, orientation and reentry results were not supplied. No direct agent access to the phone."
 }
